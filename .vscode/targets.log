@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Jun 17 20:48:55 2022
+# Make data base, printed on Fri Jun 17 20:55:00 2022
 
 # Variables
 
@@ -39,7 +39,7 @@ GDMSESSION = ubuntu
 # environment
 XMODIFIERS = @im=ibus
 # makefile
-CURDIR := /home/anht/Github/Assignment-OS/PINTOS-Ubuntu
+CURDIR := /home/anht/Github/Assignment-OS
 # makefile
 SHELL = /bin/sh
 # environment
@@ -56,8 +56,8 @@ XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu:/etc/xdg
 SNAP_INSTANCE_NAME = code
 # environment
 SNAP_ARCH = amd64
-# makefile (from 'Makefile', line 1)
-MAKEFILE_LIST :=  Makefile
+# makefile
+MAKEFILE_LIST := 
 # automatic
 @F = $(notdir $@)
 # environment
@@ -79,7 +79,7 @@ LESSOPEN = | /usr/bin/lesspipe %s
 # environment
 LC_NAME = vi_VN
 # environment
-VSCODE_CWD = /home/anht/Github/Assignment-OS/PINTOS-Ubuntu
+VSCODE_CWD = /home/anht/Github/Assignment-OS
 # environment
 GSETTINGS_SCHEMA_DIR = /snap/code/99/usr/share/glib-2.0/schemas
 # default
@@ -126,10 +126,8 @@ DISPLAY = :0
 VSCODE_PIPE_LOGGING = true
 # environment
 SNAP_INSTANCE_KEY = 
-# makefile (from 'Makefile', line 1)
-CLEAN_SUBDIRS = src doc tests
 # environment
-PWD = /home/anht/Github/Assignment-OS/PINTOS-Ubuntu
+PWD = /home/anht/Github/Assignment-OS
 # default
 .LOADED := 
 # environment
@@ -187,7 +185,7 @@ SHLVL = 1
 # environment
 GNOME_SHELL_SESSION_MODE = ubuntu
 # environment
-VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-ffb1d32a-a46c-468c-bf2d-1e257f0a6935.sock
+VSCODE_IPC_HOOK_EXTHOST = /run/user/1000/vscode-ipc-e16c5209-2524-4037-981f-ce43ab3eaeb5.sock
 # default
 MAKE_VERSION := 4.2.1
 # environment
@@ -197,7 +195,7 @@ SNAP_REVISION = 99
 # environment
 LC_MONETARY = vi_VN
 # makefile
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := 
 # environment
 XDG_CURRENT_DESKTOP = Unity
 # automatic
@@ -207,7 +205,7 @@ LC_TELEPHONE = vi_VN
 # default
 MAKE_COMMAND := make
 # environment
-OLDPWD = /home/anht/Github/Assignment-OS
+OLDPWD = /home/anht/Github
 # default
 .VARIABLES := 
 # automatic
@@ -273,18 +271,17 @@ TERM = xterm-256color
 # environment
 VSCODE_PID = 11059
 # variable set hash-table stats:
-# Load=131/1024=13%, Rehash=0, Collisions=20/159=13%
+# Load=130/1024=13%, Rehash=0, Collisions=19/152=12%
 
- 
 # Pattern-specific Variable Values
 
 # No pattern-specific variable values.
 
 # Directories
 
-# . (device 2054, inode 2764122): 11 files, no impossibilities.
+# . (device 2054, inode 2764121): 6 files, no impossibilities.
 
-# 11 files, no impossibilities in 1 directories.
+# 6 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -292,53 +289,29 @@ VSCODE_PID = 11059
 
 # Files
 
-all::
-#  Command line target.
-#  Implicit rule search has not been done.
-#  Implicit/static pattern stem: ''
-#  File does not exist.
-#  File has been updated.
-#  Needs to be updated (-q is set).
-# automatic
-# @ := all
-# automatic
-# % := 
-# automatic
-# * := 
-# automatic
-# + := 
-# automatic
-# | := 
-# automatic
-# < := 
-# automatic
-# ^ := 
-# automatic
-# ? := 
-# variable set hash-table stats:
-# Load=8/32=25%, Rehash=0, Collisions=1/11=9%
-#  recipe to execute (from 'Makefile', line 4):
-	@echo "This makefile has only 'clean' and 'check' targets."
-
-distclean:: clean
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-#  recipe to execute (from 'Makefile', line 10):
-	find . -name '*~' -exec rm '{}' \;
-
 # Not a target:
-.SUFFIXES:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
+all:
+#  Command line target.
+#  Implicit rule search has been done.
+#  File does not exist.
 #  File has not been updated.
+ 
+make: *** No rule to make target 'all'.  Stop.
+
 
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-06-16 13:47:08.49
+#  File does not exist.
 #  File has been updated.
-#  Successfully updated.
+#  Failed to be updated.
+
+# Not a target:
+makefile:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
 
 # Not a target:
 .DEFAULT:
@@ -346,34 +319,27 @@ Makefile:
 #  Modification time never checked.
 #  File has not been updated.
 
-clean::
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-#  recipe to execute (from 'Makefile', line 7):
-	for d in $(CLEAN_SUBDIRS); do $(MAKE) -C $$d $@; done
-
-check::
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-#  recipe to execute (from 'Makefile', line 13):
-	$(MAKE) -C tests $@
+# Not a target:
+GNUmakefile:
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Failed to be updated.
 
 # files hash-table stats:
-# Load=7/1024=1%, Rehash=0, Collisions=0/24=0%
+# Load=6/1024=1%, Rehash=0, Collisions=0/15=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 19 / storage = 145 B / avg = 7 B
-# current buf: size = 8162 B / used = 145 B / count = 19 / avg = 7 B
+# strcache buffers: 1 (0) / strings = 14 / storage = 127 B / avg = 9 B
+# current buf: size = 8162 B / used = 127 B / count = 14 / avg = 9 B
 
-# strcache performance: lookups = 30 / hit rate = 36%
+# strcache performance: lookups = 17 / hit rate = 17%
 # hash-table stats:
-# Load=19/8192=0%, Rehash=0, Collisions=1/30=3%
-# Finished Make data base on Fri Jun 17 20:48:55 2022
+# Load=14/8192=0%, Rehash=0, Collisions=1/17=6%
+# Finished Make data base on Fri Jun 17 20:55:00 2022
 
  
