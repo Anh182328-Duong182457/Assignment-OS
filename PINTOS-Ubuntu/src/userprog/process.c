@@ -19,6 +19,11 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 
+#ifdef VM
+#include "vm/frame.h"
+#include "vm/page.h"
+#endif
+
 static thread_func start_process NO_RETURN;
 static bool load(const char *cmdline, void (**eip)(void), void **esp);
 void push_into_stack(const char *[], int, void **);
@@ -38,12 +43,16 @@ tid_t process_execute(const char *file_name)
      Otherwise there's a race between the caller and load(). */
   fn_copy = palloc_get_page(0);
   if (fn_copy == NULL)
-    return TID_ERROR;
+    goto fail_execute;
   strlcpy(fn_copy, file_name, PGSIZE);
 
-  file_name_global = fn_copy; // @@ added by student: save the command line
+  /* @@ added by student: save the command line */
+  file_name_global = palloc_get_page(0);
+  if (file_name_global == NULL) // make sure palloc success
+    goto fail_execute;
+  strlcpy(file_name_global, fn_copy, PGSIZE);
 
-  /* @@ Added by student: palloc page in user pool */
+  // @@ Added by student: palloc page in user pool
   command_part = palloc_get_page(0);
   if (command_part == NULL) // make sure palloc success
     goto fail_execute;
@@ -59,10 +68,15 @@ tid_t process_execute(const char *file_name)
 
   return tid;
 
-fail_execute: // if fail ==> free all sooner
-  palloc_free_page(fn_copy);
-  palloc_free_page(command_part);
-  palloc_free_page(save_ptr);
+/* @@ Added by student: fail execute */
+fail_execute:
+  // if here to avoid fail by lib (palloc free (NULL) error)
+  if (fn_copy)
+    palloc_free_page(fn_copy);
+  if (command_part)
+    palloc_free_page(command_part);
+  if (save_ptr)
+    palloc_free_page(save_ptr);
 
   return TID_ERROR;
   /* End */
@@ -121,8 +135,10 @@ start_process(void *file_name_)
     goto finish_step;
 
 finish_step:
-  palloc_free_page(cmd_tokens);
-  palloc_free_page(file_name);
+  if (cmd_tokens)
+    palloc_free_page(cmd_tokens);
+  if (file_name)
+    palloc_free_page(file_name);
   sys_exit(-1);
 
   /* Start the user process by simulating a return from an
@@ -150,7 +166,7 @@ finish_step:
 int process_wait(tid_t child_tid UNUSED)
 {
   /* @@Added by student: "raw" wait to parent pro collect all zombies of it's childs */
-  int i;
+  long int i;
   for (i = 0; i < 1000000000; i++)
   {
     // NULL
@@ -163,6 +179,12 @@ void process_exit(void)
 {
   struct thread *cur = thread_current();
   uint32_t *pd;
+
+// @@@ Added by student: destroy SUPT (all SPTEs, all frame and swap)
+#ifdef VM
+  vm_supt_destroy(cur->supt);
+  cur->supt = NULL;
+#endif
 
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
@@ -210,18 +232,19 @@ void push_into_stack(const char *cmdline_tokens[], int argc, void **esp)
 
   // push push push
   int i;
-  for (i = 0; i < argc; i++)
+  for (i = argc - 1; i >= 0; i--)
   {
     length_of_token = strlen(cmdline_tokens[i]) + 1; // + 1 character NULL
-    *esp -= length_of_token;                         // arrange downwards as reference
+    *esp -= length_of_token;                         // grown downwards as reference
     memcpy(*esp, cmdline_tokens[i], length_of_token);
     argv_addr[i] = *esp; // to mark addrress
   }
 
-  // first 4-bytes value will be at 0xfffffffc, reference
-  *esp = (void *)((unsigned int)(*esp) & 0xfffffffc);
+  // word align
+  // *esp = (void *)((unsigned int)(*esp) & 0xfffffffc);
+  *esp -= 1;
 
-  // last null
+  // last null: ensure argv[argc] is null, reference
   *esp -= 4;
   *((uint32_t *)*esp) = 0;
 
@@ -240,7 +263,7 @@ void push_into_stack(const char *cmdline_tokens[], int argc, void **esp)
   *esp -= 4;
   *((int *)*esp) = argc;
 
-  // setting ret addr
+  // setting ret addr (return address)
   *esp -= 4;
   *((int *)*esp) = 0;
 }
@@ -330,6 +353,12 @@ bool load(const char *file_name, void (**eip)(void), void **esp)
 
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create();
+
+// @@@ Added by student: supt create step
+#ifdef VM
+  t->supt = vm_supt_create();
+#endif
+
   if (t->pagedir == NULL)
     goto done;
   process_activate();
@@ -502,6 +531,21 @@ load_segment(struct file *file, off_t ofs, uint8_t *upage,
     size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
     size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
+/**
+ * @@@ Added by student: implement lazy load
+ */
+#ifdef VM
+    struct thread *curr = thread_current();
+    ASSERT(pagedir_get_page(curr->pagedir, upage) == NULL); // not virtual page yet
+
+    if (!vm_supt_install_filesys(curr->supt, upage,
+                                 file, ofs, page_read_bytes, page_zero_bytes, writable))
+    {
+      return false;
+    }
+
+#else
+
     /* Get a page of memory. */
     uint8_t *kpage = palloc_get_page(PAL_USER);
     if (kpage == NULL)
@@ -522,11 +566,18 @@ load_segment(struct file *file, off_t ofs, uint8_t *upage,
       return false;
     }
 
+#endif
+
     /* Advance. */
     read_bytes -= page_read_bytes;
     zero_bytes -= page_zero_bytes;
     upage += PGSIZE;
   }
+
+// @@@ Added by student
+#ifdef VM
+  ofs += PGSIZE;
+#endif
   return true;
 }
 
@@ -563,10 +614,15 @@ static bool
 install_page(void *upage, void *kpage, bool writable)
 {
   struct thread *t = thread_current();
+  /* Verify that there's not already a page at that virtual
+     address, then map our page there. */
   bool success = (pagedir_get_page(t->pagedir, upage) == NULL);
   success = success && pagedir_set_page(t->pagedir, upage, kpage, writable);
 
-  /* Verify that there's not already a page at that virtual
-     address, then map our page there. */
+#ifdef VM
+  success = success && vm_supt_install_frame(t->supt, upage, kpage);
+  if (success)
+    vm_frame_unpin(kpage);
+#endif
   return success;
 }

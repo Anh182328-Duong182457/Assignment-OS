@@ -5,6 +5,14 @@
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 
+#ifdef VM
+#include "vm/page.h"
+#include "vm/frame.h"
+#endif
+
+// @@@ Added by student 
+#define STACK_SIZE_MAX 0x800000 
+
 /* Number of page faults processed. */
 static long long page_fault_cnt;
 
@@ -87,6 +95,7 @@ kill(struct intr_frame *f)
       printf("%s: dying due to interrupt %#04x (%s).\n",
              thread_name(), f->vec_no, intr_name(f->vec_no));
       intr_dump_frame(f);
+      // @@ added by student: to know if user process cause page fault
       printf("\n[Message by sudent] User process has tried to access unmapped vm (page fault) !");
       sys_exit(-1); // @@ added by student
 
