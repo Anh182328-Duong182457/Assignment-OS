@@ -12,7 +12,7 @@ static int memread_user(void *src, void *des, size_t bytes);
 
 // System call to exit terminated process
 void syscall_init(void);
-void sys_exit(int);
+void syscall_exit(int);
 static void syscall_handler(struct intr_frame *f);
 
 void syscall_init(void)
@@ -20,7 +20,7 @@ void syscall_init(void)
   intr_register_int(0x30, 3, INTR_ON, syscall_handler, "syscall");
 }
 
-void sys_exit(int status)
+void syscall_exit(int status)
 {
   printf("\n[Message by student] %s: exit(%d)\n\n", thread_current()->name, status);
   thread_exit();
@@ -35,22 +35,26 @@ syscall_handler(struct intr_frame *f)
   // The system call number is in the 32-bit word at the caller's stack pointer.
   memread_user(f->esp, &syscall_number, sizeof(syscall_number));
 
-  // SYS_*** constants are defined in syscall-nr.h
+  // SYS_* constants are defined in syscall-nr.h
   switch (syscall_number)
   {
   case SYS_EXIT: // 1
   {
     int exitcode;
-    memread_user(f->esp + 4, &exitcode, sizeof(exitcode));
+    memread_user(f->esp + 4, &exitcode, sizeof(exitcode)); // jump through the ret code
 
-    sys_exit(exitcode);
+    printf("\n[Message by student]: System call, number = %d\n", syscall_number);
+
+    thread_current()->current_esp = f->esp;
+
+    syscall_exit(exitcode);
     NOT_REACHED();
     break;
   }
   /* unhandled case */
   default:
     printf("[ERROR] system call EXIT is unimplemented!\n");
-    sys_exit(-1);
+    syscall_exit(-1);
     break;
   }
 }
@@ -65,7 +69,7 @@ memread_user(void *src, void *dst, size_t bytes)
     value = get_user(src + i);
     if (value == -1) // segfault or invalid memory access
     {
-      sys_exit(-1);
+      syscall_exit(-1);
       NOT_REACHED(); // PANIC kernel
     }
 

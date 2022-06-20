@@ -3,6 +3,6 @@
 
 // System call to exit terminated process
 void syscall_init(void);
-void sys_exit(int);
+void syscall_exit(int);
 
 #endif /* userprog/syscall.h */

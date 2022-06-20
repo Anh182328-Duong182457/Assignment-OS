@@ -127,7 +127,7 @@ start_process(void *file_name_)
 
   /**
    * @@ Added by student: to check if load success of fail
-   * print termination message here via sys_exit(-1); !!!
+   * print termination message here via syscall_exit(-1); !!!
    */
   if (success)
     push_into_stack(cmd_tokens, count, &if_.esp);
@@ -139,7 +139,7 @@ finish_step:
     palloc_free_page(cmd_tokens);
   if (file_name)
     palloc_free_page(file_name);
-  sys_exit(-1);
+  syscall_exit(-1);
 
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
@@ -241,7 +241,6 @@ void push_into_stack(const char *cmdline_tokens[], int argc, void **esp)
   }
 
   // word align
-  // *esp = (void *)((unsigned int)(*esp) & 0xfffffffc);
   *esp -= 1;
 
   // last null: ensure argv[argc] is null, reference

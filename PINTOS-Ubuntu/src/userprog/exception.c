@@ -97,7 +97,7 @@ kill(struct intr_frame *f)
       intr_dump_frame(f);
       // @@ added by student: to know if user process cause page fault
       printf("\n[Message by sudent] User process has tried to access unmapped vm (page fault) !");
-      sys_exit(-1); // @@ added by student
+      syscall_exit(-1); // @@ added by student
 
    case SEL_KCSEG:
       /* Kernel's code segment, which indicates a kernel bug.
